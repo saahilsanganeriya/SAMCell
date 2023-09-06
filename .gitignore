@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__
+*.pyc
+checkpoints
+datasets
+src/wandb
+dataset_processing/CellPose
