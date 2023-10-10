@@ -32,21 +32,21 @@ class SAMDataset(Dataset):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         #adaptive hist normalization
-        img_norm = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8)).apply(img)
+        # img_norm = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8)).apply(img)
 
         #grab 2nd derivative via laplacian
         # edges = cv2.Laplacian(img_norm, cv2.CV_64F, ksize=3)
-        edges = img_norm
+        # edges = img_norm
 
         #grab 1st derivative via sobel
         # edges = cv2.Sobel(img_norm, cv2.CV_64F, 1, 1, ksize=3)
         
-        edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
         #cvt to 3 channel
-        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         
-        return edges
+        return img
     
     def _data_augmentation(self, img, label, weight):
         #random flip
@@ -120,6 +120,7 @@ class SAMDataset(Dataset):
         inputs = {k:v.squeeze(0) for k,v in inputs.items()}
 
         inputs['ground_truth_mask'] = label
+        # inputs['binary_mask'] = label > 0.001
 
         if self.weights is not None:
             inputs['weight'] = torch.tensor(weight).float()

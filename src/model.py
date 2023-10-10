@@ -17,10 +17,7 @@ class FinetunedSAM():
     '''a helper class to handle setting up SAM from the transformers library for finetuning
     '''
     def __init__(self, sam_model, finetune_vision=False, finetune_prompt=True, finetune_decoder=True):
-        self.model = SamModel.from_pretrained(sam_model).to('cuda')
-        self.w_As = []
-        self.w_Bs = []
-
+        self.model = SamModel.from_pretrained(sam_model)
         #freeze required layers
         if not finetune_vision:
             for param in self.model.vision_encoder.parameters():

@@ -6,6 +6,7 @@ from torch import nn
 import numpy as np
 import cv2
 from transformers import SamProcessor
+from slidingWindow import SlidingWindowHelper
 
 class SlidingWindowPipeline:
     def __init__(self, model, device, crop_size=256):
@@ -14,11 +15,18 @@ class SlidingWindowPipeline:
         self.crop_size = crop_size
         self.sigmoid = nn.Sigmoid()
         self.processor = SamProcessor.from_pretrained('facebook/sam-vit-base')
+        self.sliding_window_helper = SlidingWindowHelper(crop_size, 32)
 
     def _preprocess(self, img):
-        #normalize
-        img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-        img_orig = img.copy()
+        # img = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8)).apply(img)
+
+        #grab 2nd derivative via laplacian
+        # edges = cv2.Laplacian(img_norm, cv2.CV_64F, ksize=3)
+
+        #grab 1st derivative via sobel
+        # edges = cv2.Sobel(img_norm, cv2.CV_64F, 1, 1, ksize=3)
+        
+        # img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
         #convert to color if necessary
         if len(img.shape) != 3:
@@ -71,23 +79,26 @@ class SlidingWindowPipeline:
 
         # image_orig = cv2.resize(image_orig, (new_size))
 
-        crops = self.spilt_into_crops(image_orig)
+        # crops = self.spilt_into_crops(image_orig)
+        crops, orig_regions, crop_unique_region = self.sliding_window_helper.seperate_into_crops(image_orig)
 
         #predict on crops
         dist_maps = []
         for crop in crops:
-            dist_map = self.get_model_prediction(crop[0]).cpu().numpy()
+            dist_map = self.get_model_prediction(crop).cpu().numpy()
 
             #resize to crop size
             dist_map = cv2.resize(dist_map, (self.crop_size, self.crop_size))
             dist_maps.append(dist_map)
 
         #reconstruct image
-        cell_dist_map = np.zeros(image_orig.shape)
-        for crop in crops:
-            min_x,min_y = crop[1]
-            cell_dist_map[min_x:min_x+self.crop_size, min_y:min_y+self.crop_size] = dist_maps.pop(0)
-        
+        # cell_dist_map = np.zeros(image_orig.shape)
+        # for crop in crops:
+        #     min_x,min_y = crop[1]
+        #     cell_dist_map[min_x:min_x+self.crop_size, min_y:min_y+self.crop_size] = dist_maps.pop(0)
+
+        cell_dist_map = self.sliding_window_helper.combine_crops(orig_shape, dist_maps, orig_regions, crop_unique_region)
+
         return cell_dist_map
 
     def cells_from_dist_map(self, dist_map):
@@ -96,9 +107,23 @@ class SlidingWindowPipeline:
         #find centroids of connected components
         contours, _ = cv2.findContours(cells_max.astype(np.uint8), 0, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros(dist_map.shape, dtype=np.int32)
+        # for i, contour in enumerate(contours):
+        #     contour = np.flip(contour, axis=2)
+        #     mask[tuple(contour.T)] = i + 1
+
         for i, contour in enumerate(contours):
-            contour = np.flip(contour, axis=2)
-            mask[tuple(contour.T)] = i + 1
+            M = cv2.moments(contour)
+
+            if M["m00"] != 0:
+                cX = int(M["m10"] / M["m00"])
+                cY = int(M["m01"] / M["m00"])
+            else:
+                # Handle cases where the moment is zero to avoid division by zero
+                cX, cY = 0, 0
+
+            #set closest pixel to centroid
+            mask[int(cY), int(cX)] = i + 1
+
 
         labels = watershed(-dist_map, mask, mask=cell_fill).astype(np.int32)
 
