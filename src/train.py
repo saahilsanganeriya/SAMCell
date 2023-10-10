@@ -21,7 +21,7 @@ ann_path = dataset_path + 'dist_maps.npy'
 weight_path = dataset_path + 'wms.npy'
 
 sam_model = 'facebook/sam-vit-base'
-output_path = '../checkpoints/samcell-cyto-lora'
+output_path = '../checkpoints/samcell'
 num_epochs = 40
 do_log_wandb = False
 
@@ -33,8 +33,8 @@ train_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
 print('loaded {} images'.format(len(dataset)))
 
 print('loading model...')
-loraHelper = FinetunedSAM(sam_model, LoRA_rank=4, finetune_vision=True, finetune_prompt=False, finetune_decoder=True, lora_vision=True)
-model = loraHelper.get_model()
+modelHelper = FinetunedSAM(sam_model, finetune_vision=False, finetune_prompt=False, finetune_decoder=True)
+model = modelHelper.get_model()
 
 print('training...')
 device = "cuda" if torch.cuda.is_available() else "cpu"
