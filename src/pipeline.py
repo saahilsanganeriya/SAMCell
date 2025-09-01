@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from skimage.segmentation import watershed
 import math
 import torch
@@ -9,6 +9,7 @@ from transformers import SamProcessor
 from slidingWindow import SlidingWindowHelper
 from skimage import measure
 from tqdm import tqdm
+from metrics import calculate_all_metrics, export_metrics_csv, compute_gui_metrics
 
 
 class SlidingWindowPipeline:
@@ -192,3 +193,66 @@ class SlidingWindowPipeline:
                 labels = watershed(-dist_map, base_mask, mask=cell_fill_mask).astype(np.int32)
                 results[(cells_max, cell_fill)] = labels
         return results
+    
+    def calculate_metrics(self, labels: np.ndarray, original_image: Optional[np.ndarray] = None, 
+                         include_texture: bool = False) -> 'pd.DataFrame':
+        """
+        Calculate comprehensive metrics for segmented cells.
+        
+        Parameters
+        ----------
+        labels : np.ndarray
+            Labeled segmentation mask
+        original_image : np.ndarray, optional
+            Original grayscale image for intensity-based metrics
+        include_texture : bool
+            Whether to include texture metrics (computationally expensive)
+            
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing all metrics for each cell
+        """
+        return calculate_all_metrics(labels, original_image, include_texture)
+    
+    def export_metrics(self, labels: np.ndarray, output_path: str, 
+                      original_image: Optional[np.ndarray] = None,
+                      include_texture: bool = False) -> bool:
+        """
+        Calculate and export metrics to CSV file.
+        
+        Parameters
+        ----------
+        labels : np.ndarray
+            Labeled segmentation mask
+        output_path : str
+            Path to save the CSV file
+        original_image : np.ndarray, optional
+            Original grayscale image
+        include_texture : bool
+            Whether to include texture metrics
+            
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
+        """
+        return export_metrics_csv(labels, output_path, original_image, include_texture)
+    
+    def get_basic_metrics(self, labels: np.ndarray, original_image: Optional[np.ndarray] = None):
+        """
+        Get basic metrics compatible with the GUI.
+        
+        Parameters
+        ----------
+        labels : np.ndarray
+            Labeled segmentation mask
+        original_image : np.ndarray, optional
+            Original grayscale image
+            
+        Returns
+        -------
+        tuple
+            (cell_count, avg_cell_area, confluency_str, avg_neighbors)
+        """
+        return compute_gui_metrics(labels, original_image)

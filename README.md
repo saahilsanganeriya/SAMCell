@@ -1,0 +1,319 @@
+# SAMCell: Generalized Label-Free Biological Cell Segmentation
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Paper](https://img.shields.io/badge/Paper-bioRxiv-red.svg)](https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1)
+
+SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell provides superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
+
+## 🌟 Key Features
+
+- **State-of-the-art Performance**: Outperforms existing methods like Cellpose, Stardist, and CALT-US
+- **Zero-shot Generalization**: Works on new cell types and microscopes without retraining
+- **Distance Map Regression**: Novel approach using Euclidean distance maps for robust segmentation
+- **Comprehensive Metrics**: Calculate 30+ morphological and intensity-based cell metrics
+- **Easy Integration**: Simple Python API with minimal setup
+- **Multiple Interfaces**: Command-line tool, Python API, GUI, and Napari plugin
+
+## 📊 Performance
+
+SAMCell demonstrates superior performance in both test-set and zero-shot cross-dataset evaluation:
+
+| Method | PBL-HEK (OP_CSB) | PBL-N2a (OP_CSB) |
+|--------|------------------|------------------|
+| **SAMCell-Generalist** | **0.598** | **0.824** |
+| Cellpose | 0.320 | 0.764 |
+| Stardist | 0.189 | 0.724 |
+
+*Results on zero-shot cross-dataset evaluation*
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Install from PyPI (recommended)
+pip install samcell
+
+# Or install from source
+git clone https://github.com/saahilsanganeriya/SAMCell.git
+cd SAMCell
+pip install -e .
+```
+
+### Download Pre-trained Weights
+
+Download the pre-trained SAMCell model weights:
+
+```bash
+# SAMCell-Generalist (recommended)
+wget https://github.com/saahilsanganeriya/SAMCell/releases/download/v1/samcell-generalist.pt
+
+# Or SAMCell-Cyto
+wget https://github.com/saahilsanganeriya/SAMCell/releases/download/v1/samcell-cyto.pt
+```
+
+### Basic Usage
+
+```python
+import cv2
+import samcell
+
+# Load your microscopy image
+image = cv2.imread('your_image.png', cv2.IMREAD_GRAYSCALE)
+
+# Initialize SAMCell
+model = samcell.FinetunedSAM('facebook/sam-vit-base')
+model.load_weights('samcell-generalist.pt')
+
+# Create pipeline
+pipeline = samcell.SAMCellPipeline(model, device='cuda')
+
+# Segment cells
+labels = pipeline.run(image)
+
+# Calculate metrics
+metrics_df = pipeline.calculate_metrics(labels, image)
+print(f"Found {len(metrics_df)} cells")
+
+# Export results
+pipeline.export_metrics(labels, 'cell_metrics.csv', image)
+```
+
+### Command Line Interface
+
+```bash
+# Basic segmentation
+samcell segment image.png --model samcell-generalist.pt --output results/
+
+# With comprehensive metrics
+samcell segment image.png --model samcell-generalist.pt --output results/ --export-metrics
+
+# Custom thresholds
+samcell segment image.png --model samcell-generalist.pt --peak-threshold 0.5 --fill-threshold 0.1
+```
+
+## 📋 Requirements
+
+- Python ≥ 3.8
+- PyTorch ≥ 1.9.0
+- transformers ≥ 4.26.0
+- OpenCV ≥ 4.5.0
+- scikit-image ≥ 0.19.0
+- pandas ≥ 1.3.0
+
+For GPU acceleration:
+- CUDA-compatible GPU
+- CUDA Toolkit ≥ 11.0
+
+## 🔧 Advanced Usage
+
+### Custom Thresholds
+
+SAMCell uses two key thresholds for post-processing:
+
+```python
+# Default values (optimized across datasets)
+pipeline = samcell.SAMCellPipeline(model, device='cuda')
+labels = pipeline.run(image, cells_max=0.47, cell_fill=0.09)
+```
+
+### Batch Processing
+
+```python
+# Process multiple images
+images = [cv2.imread(f'image_{i}.png', 0) for i in range(10)]
+
+results = []
+for image in images:
+    labels = pipeline.run(image)
+    metrics = pipeline.calculate_metrics(labels, image)
+    results.append(metrics)
+
+# Combine all metrics
+import pandas as pd
+all_metrics = pd.concat(results, ignore_index=True)
+```
+
+### Comprehensive Metrics
+
+SAMCell calculates 30+ morphological and intensity metrics:
+
+```python
+# Basic metrics (fast)
+basic_metrics = samcell.calculate_basic_metrics(labels, image)
+
+# Include neighbor analysis
+neighbor_metrics = samcell.calculate_neighbor_metrics(labels)
+
+# Full analysis including texture (slower)
+full_metrics = samcell.calculate_all_metrics(
+    labels, image, include_texture=True
+)
+```
+
+## 🖥️ GUI and Napari Plugin
+
+### Standalone GUI
+
+```bash
+# Install GUI dependencies
+pip install samcell[gui]
+
+# Launch GUI
+python -m samcell.gui
+```
+
+### Napari Plugin
+
+```bash
+# Install napari plugin
+pip install samcell[napari]
+
+# Launch napari and find SAMCell in the plugins menu
+napari
+```
+
+## 📖 Documentation
+
+### API Reference
+
+#### `FinetunedSAM`
+
+```python
+model = samcell.FinetunedSAM(sam_model='facebook/sam-vit-base')
+model.load_weights(weight_path, map_location='cuda')
+```
+
+#### `SAMCellPipeline`
+
+```python
+pipeline = samcell.SAMCellPipeline(
+    model,                    # FinetunedSAM instance
+    device='cuda',           # 'cuda' or 'cpu'
+    crop_size=256,          # Patch size for sliding window
+)
+
+# Run segmentation
+labels = pipeline.run(
+    image,                   # Input grayscale image
+    cells_max=0.47,         # Cell peak threshold
+    cell_fill=0.09,         # Cell fill threshold
+    return_dist_map=False   # Return distance map
+)
+```
+
+#### Metrics Functions
+
+```python
+# Calculate all metrics
+metrics_df = samcell.calculate_all_metrics(
+    labels,                  # Segmentation labels
+    original_image=None,     # Original image for intensity metrics
+    include_texture=False,   # Include texture analysis
+    neighbor_distance=10     # Distance for neighbor analysis
+)
+
+# Export to CSV
+success = samcell.export_metrics_csv(
+    labels,
+    'output.csv',
+    original_image=image,
+    include_texture=False
+)
+```
+
+### Available Metrics
+
+SAMCell calculates comprehensive morphological metrics:
+
+**Shape Metrics:**
+- Area, Perimeter, Convex Area
+- Compactness, Circularity, Roundness
+- Aspect Ratio, Eccentricity, Solidity
+- Major/Minor Axis Lengths
+
+**Spatial Metrics:**
+- Centroid coordinates
+- Bounding box dimensions
+- Number of neighbors
+- Nearest neighbor distances
+
+**Intensity Metrics** (when original image provided):
+- Mean, Standard deviation, Min/Max intensity
+- Intensity range and distribution
+
+**Texture Metrics** (optional):
+- GLCM-based features
+- Contrast, Homogeneity, Energy
+- Correlation, Dissimilarity
+
+## 🔬 Method Overview
+
+SAMCell introduces several key innovations:
+
+1. **Distance Map Regression**: Instead of direct segmentation, predicts Euclidean distance from each pixel to cell boundaries
+2. **Watershed Post-processing**: Converts distance maps to discrete cell masks using watershed algorithm
+3. **Sliding Window Inference**: Processes large images in overlapping 256×256 patches
+4. **No Prompting Required**: Works automatically without user-provided prompts
+
+## 📊 Datasets
+
+SAMCell was trained on:
+- **LIVECell**: 5,000+ phase-contrast images, 8 cell types, 1.7M annotated cells
+- **Cellpose Cytoplasm**: ~600 diverse microscopy images from internet sources
+
+Evaluated on novel datasets:
+- **PBL-HEK**: Human Embryonic Kidney 293 cells
+- **PBL-N2a**: Neuro-2a cells
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+## 📄 Citation
+
+If you use SAMCell in your research, please cite our paper:
+
+```bibtex
+@article{vandeloo2025samcell,
+    title={SAMCell: Generalized label-free biological cell segmentation with segment anything},
+    author={VandeLoo, Alexandra Dunnum and Malta, Nathan J and Sanganeriya, Saahil and Aponte, Emilio and van Zyl, Caitlin and Xu, Danfei and Forest, Craig},
+    journal={bioRxiv},
+    year={2025},
+    publisher={Cold Spring Harbor Laboratory},
+    doi={10.1101/2025.02.06.636835},
+    url={https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1}
+}
+```
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/saahilsanganeriya/SAMCell/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/saahilsanganeriya/SAMCell/discussions)
+- **Email**: saahilsanganeriya@gatech.edu
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏛️ Institutions
+
+This work was developed at:
+- **Georgia Institute of Technology**
+  - School of Biological Sciences
+  - School of Computer Science  
+  - Department of Biomedical Engineering
+  - School of Mechanical Engineering
+  - School of Interactive Computing
+
+## 🙏 Acknowledgments
+
+- Meta AI for the original Segment Anything Model
+- The open-source community for tools and datasets
+- Georgia Tech for computational resources
+- All contributors and users of SAMCell
+
+---
+
+**SAMCell Team** - Making cell segmentation accessible to everyone! 🔬✨
