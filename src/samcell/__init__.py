@@ -29,7 +29,7 @@ Example usage:
     >>> metrics = pipeline.calculate_metrics(labels, image)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "SAMCell Team"
 __email__ = "saahilsanganeriya@gatech.edu"
 
@@ -41,7 +41,9 @@ from .metrics import (
     calculate_basic_metrics, 
     calculate_neighbor_metrics,
     calculate_summary_metrics,
+    calculate_metric_statistics,
     export_metrics_csv,
+    export_metrics_excel,
     compute_gui_metrics,
 )
 from .utils import lr_warmup, init_wandb, log_wandb
@@ -57,7 +59,9 @@ __all__ = [
     "calculate_basic_metrics",
     "calculate_neighbor_metrics", 
     "calculate_summary_metrics",
+    "calculate_metric_statistics",
     "export_metrics_csv",
+    "export_metrics_excel",
     "compute_gui_metrics",
     "lr_warmup",
     "init_wandb",

@@ -486,8 +486,76 @@ def calculate_all_metrics(labels: np.ndarray, original_image: Optional[np.ndarra
         logger.error(f"Error in calculate_all_metrics: {str(e)}")
         return pd.DataFrame()
 
+def calculate_metric_statistics(df: pd.DataFrame, exclude_columns: List[str] = None) -> pd.DataFrame:
+    """
+    Calculate summary statistics (mean, median, std, min, max, IQR) for each metric.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing per-cell metrics
+    exclude_columns : List[str], optional
+        Columns to exclude from statistics calculation
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with statistics for each metric
+    """
+    try:
+        if df.empty:
+            return pd.DataFrame()
+            
+        # Columns to exclude from statistics
+        if exclude_columns is None:
+            exclude_columns = ['cell_id', 'image_id', 'metric_type', 'metric_name']
+        
+        # Get numeric columns only
+        numeric_columns = df.select_dtypes(include=[np.number]).columns
+        numeric_columns = [col for col in numeric_columns if col not in exclude_columns]
+        
+        if not numeric_columns:
+            logger.warning("No numeric columns found for statistics calculation")
+            return pd.DataFrame()
+        
+        # Calculate statistics
+        stats_data = []
+        
+        for col in numeric_columns:
+            values = df[col].dropna()
+            if len(values) == 0:
+                continue
+                
+            # Calculate quartiles for IQR
+            q25 = values.quantile(0.25)
+            q75 = values.quantile(0.75)
+            iqr = q75 - q25
+            
+            stats_row = {
+                'metric': col,
+                'count': len(values),
+                'mean': values.mean(),
+                'median': values.median(),
+                'std': values.std(),
+                'min': values.min(),
+                'max': values.max(),
+                'range': values.max() - values.min(),
+                'q25': q25,
+                'q75': q75,
+                'iqr': iqr,
+            }
+            stats_data.append(stats_row)
+        
+        stats_df = pd.DataFrame(stats_data)
+        logger.info(f"Calculated statistics for {len(stats_df)} metrics")
+        return stats_df
+        
+    except Exception as e:
+        logger.error(f"Error in calculate_metric_statistics: {str(e)}")
+        return pd.DataFrame()
+
 def export_metrics_csv(labels: np.ndarray, output_path: str, original_image: Optional[np.ndarray] = None,
-                      include_texture: bool = False, include_summary: bool = True) -> bool:
+                      include_texture: bool = False, include_summary: bool = True, include_statistics: bool = True) -> bool:
     """
     Calculate metrics and export to CSV file.
     
@@ -503,6 +571,8 @@ def export_metrics_csv(labels: np.ndarray, output_path: str, original_image: Opt
         Whether to include texture metrics
     include_summary : bool
         Whether to include summary metrics as additional rows
+    include_statistics : bool
+        Whether to include metric statistics (mean, median, std, etc.)
         
     Returns
     -------
@@ -517,34 +587,133 @@ def export_metrics_csv(labels: np.ndarray, output_path: str, original_image: Opt
             logger.error("No metrics calculated, cannot export CSV")
             return False
         
-        # Add summary metrics if requested
+        # Create a comprehensive output with multiple sections
+        sections = []
+        
+        # Add per-cell metrics
+        sections.append(df)
+        
+        # Add separator and statistics
+        if include_statistics:
+            stats_df = calculate_metric_statistics(df)
+            if not stats_df.empty:
+                separator = pd.DataFrame([{col: '---' for col in df.columns}])
+                sections.append(separator)
+                
+                # Add statistics with proper column alignment
+                stats_aligned = pd.DataFrame()
+                stats_aligned['metric'] = stats_df['metric']
+                stats_aligned['statistic_type'] = 'STATISTICS'
+                stats_aligned['count'] = stats_df['count']
+                stats_aligned['mean'] = stats_df['mean']
+                stats_aligned['median'] = stats_df['median']
+                stats_aligned['std'] = stats_df['std']
+                stats_aligned['min'] = stats_df['min']
+                stats_aligned['max'] = stats_df['max']
+                stats_aligned['range'] = stats_df['range']
+                stats_aligned['q25'] = stats_df['q25']
+                stats_aligned['q75'] = stats_df['q75']
+                stats_aligned['iqr'] = stats_df['iqr']
+                
+                # Fill remaining columns with NaN
+                for col in df.columns:
+                    if col not in stats_aligned.columns:
+                        stats_aligned[col] = np.nan
+                
+                sections.append(stats_aligned)
+        
+        # Add separator and summary
         if include_summary:
             summary = calculate_summary_metrics(labels, original_image)
-            
-            # Add summary as additional rows
-            summary_rows = []
-            for key, value in summary.items():
-                summary_row = {'metric_type': 'summary', 'metric_name': key, 'value': value}
-                # Fill other columns with NaN
+            if summary:
+                separator2 = pd.DataFrame([{col: '---' for col in df.columns}])
+                sections.append(separator2)
+                
+                # Add summary with proper column alignment
+                summary_aligned = pd.DataFrame()
+                summary_aligned['metric'] = 'IMAGE_SUMMARY'
+                summary_aligned['statistic_type'] = 'SUMMARY'
+                
+                # Map summary metrics to appropriate columns
+                summary_df = pd.DataFrame([summary])
+                for key, value in summary_df.iloc[0].items():
+                    if key in df.columns:
+                        summary_aligned[key] = [value]
+                    else:
+                        # Add as new column
+                        summary_aligned[key] = [value]
+                
+                # Fill remaining columns with NaN
                 for col in df.columns:
-                    if col not in summary_row:
-                        summary_row[col] = np.nan
-                summary_rows.append(summary_row)
-            
-            if summary_rows:
-                summary_df = pd.DataFrame(summary_rows)
-                # Add a separator row
-                separator_row = pd.DataFrame([{col: '---' if col in ['metric_type', 'metric_name'] else np.nan 
-                                             for col in summary_df.columns}])
-                df = pd.concat([df, separator_row, summary_df], ignore_index=True)
+                    if col not in summary_aligned.columns:
+                        summary_aligned[col] = np.nan
+                
+                sections.append(summary_aligned)
+        
+        # Combine all sections
+        final_df = pd.concat(sections, ignore_index=True) if len(sections) > 1 else df
         
         # Export to CSV
-        df.to_csv(output_path, index=False)
+        final_df.to_csv(output_path, index=False)
         logger.info(f"Metrics exported to {output_path}")
         return True
         
     except Exception as e:
         logger.error(f"Error exporting metrics to CSV: {str(e)}")
+        return False
+
+def export_metrics_excel(labels: np.ndarray, output_path: str, original_image: Optional[np.ndarray] = None,
+                        include_texture: bool = False) -> bool:
+    """
+    Export metrics to Excel file with separate sheets for different data types.
+    
+    Parameters
+    ----------
+    labels : np.ndarray
+        Labeled segmentation mask
+    output_path : str
+        Path to save the Excel file (.xlsx)
+    original_image : np.ndarray, optional
+        Original grayscale image
+    include_texture : bool
+        Whether to include texture metrics
+        
+    Returns
+    -------
+    bool
+        True if successful, False otherwise
+    """
+    try:
+        # Calculate all metrics
+        df = calculate_all_metrics(labels, original_image, include_texture)
+        
+        if df.empty:
+            logger.error("No metrics calculated, cannot export Excel")
+            return False
+        
+        # Calculate statistics and summary
+        stats_df = calculate_metric_statistics(df)
+        summary = calculate_summary_metrics(labels, original_image)
+        
+        # Export to Excel with multiple sheets
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+            # Per-cell metrics
+            df.to_excel(writer, sheet_name='Per_Cell_Metrics', index=False)
+            
+            # Metric statistics
+            if not stats_df.empty:
+                stats_df.to_excel(writer, sheet_name='Metric_Statistics', index=False)
+            
+            # Image summary
+            if summary:
+                summary_df = pd.DataFrame([summary])
+                summary_df.to_excel(writer, sheet_name='Image_Summary', index=False)
+        
+        logger.info(f"Metrics exported to Excel: {output_path}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error exporting metrics to Excel: {str(e)}")
         return False
 
 # Convenience function for the GUI

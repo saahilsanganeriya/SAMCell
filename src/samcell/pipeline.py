@@ -6,10 +6,10 @@ from torch import nn
 import numpy as np
 import cv2
 from transformers import SamProcessor
-from slidingWindow import SlidingWindowHelper
+from .slidingWindow import SlidingWindowHelper
 from skimage import measure
 from tqdm import tqdm
-from metrics import calculate_all_metrics, export_metrics_csv, compute_gui_metrics
+from .metrics import calculate_all_metrics, export_metrics_csv, compute_gui_metrics, calculate_metric_statistics, export_metrics_excel
 
 
 class SlidingWindowPipeline:
@@ -217,7 +217,7 @@ class SlidingWindowPipeline:
     
     def export_metrics(self, labels: np.ndarray, output_path: str, 
                       original_image: Optional[np.ndarray] = None,
-                      include_texture: bool = False) -> bool:
+                      include_texture: bool = False, include_statistics: bool = True) -> bool:
         """
         Calculate and export metrics to CSV file.
         
@@ -231,13 +231,62 @@ class SlidingWindowPipeline:
             Original grayscale image
         include_texture : bool
             Whether to include texture metrics
+        include_statistics : bool
+            Whether to include metric statistics (mean, median, std, etc.)
             
         Returns
         -------
         bool
             True if successful, False otherwise
         """
-        return export_metrics_csv(labels, output_path, original_image, include_texture)
+        return export_metrics_csv(labels, output_path, original_image, include_texture, 
+                                 include_summary=True, include_statistics=include_statistics)
+    
+    def export_metrics_excel(self, labels: np.ndarray, output_path: str, 
+                            original_image: Optional[np.ndarray] = None,
+                            include_texture: bool = False) -> bool:
+        """
+        Calculate and export metrics to Excel file with separate sheets.
+        
+        Parameters
+        ----------
+        labels : np.ndarray
+            Labeled segmentation mask
+        output_path : str
+            Path to save the Excel file (.xlsx)
+        original_image : np.ndarray, optional
+            Original grayscale image
+        include_texture : bool
+            Whether to include texture metrics
+            
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
+        """
+        return export_metrics_excel(labels, output_path, original_image, include_texture)
+    
+    def get_metric_statistics(self, labels: np.ndarray, original_image: Optional[np.ndarray] = None,
+                             include_texture: bool = False) -> 'pd.DataFrame':
+        """
+        Calculate summary statistics for all metrics.
+        
+        Parameters
+        ----------
+        labels : np.ndarray
+            Labeled segmentation mask
+        original_image : np.ndarray, optional
+            Original grayscale image for intensity-based metrics
+        include_texture : bool
+            Whether to include texture metrics (computationally expensive)
+            
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing statistics (mean, median, std, etc.) for each metric
+        """
+        df = calculate_all_metrics(labels, original_image, include_texture)
+        return calculate_metric_statistics(df)
     
     def get_basic_metrics(self, labels: np.ndarray, original_image: Optional[np.ndarray] = None):
         """
