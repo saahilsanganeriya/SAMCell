@@ -1,12 +1,21 @@
 from torch.utils.data import Dataset
 import numpy as np
 import os
-import h5py
 import cv2
-from torchvision import transforms
 import torch
 import random
 import time
+
+# Optional dependencies for training
+try:
+    import h5py
+except ImportError:
+    h5py = None
+
+try:
+    from torchvision import transforms
+except ImportError:
+    transforms = None
 
 class SAMDataset(Dataset):
     def __init__(self, img_path, ann_path, processor, weight_path=None, crop_size=256):

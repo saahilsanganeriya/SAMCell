@@ -15,7 +15,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="samcell",
-    version="1.1.0",
+    version="1.1.1",
     author="SAMCell Team",
     author_email="saahilsanganeriya@gatech.edu",
     description="Generalized label-free biological cell segmentation with Segment Anything",
@@ -41,12 +41,21 @@ setup(
     python_requires=">=3.8",
     install_requires=requirements,
     extras_require={
+        "training": [
+            "h5py>=3.0.0",
+            "torchvision>=0.10.0", 
+            "wandb>=0.12.0",
+        ],
+        "excel": [
+            "openpyxl>=3.0.0",
+        ],
         "dev": [
             "pytest>=6.0",
             "pytest-cov>=2.0",
             "black>=21.0",
             "flake8>=3.8",
             "mypy>=0.800",
+            "jupyter>=1.0.0",
         ],
         "gui": [
             "PyQt6>=6.0",
@@ -54,6 +63,9 @@ setup(
         "napari": [
             "napari>=0.4.14",
             "magicgui>=0.5.0",
+        ],
+        "all": [
+            "samcell[training,excel,dev,gui,napari]",
         ],
     },
     entry_points={

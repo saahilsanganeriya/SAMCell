@@ -1,5 +1,4 @@
 torch>=1.9.0
-torchvision>=0.10.0
 transformers>=4.26.0
 numpy<2.0,>=1.21.0
 opencv-python-headless>=4.5.0
@@ -11,7 +10,7 @@ Pillow>=8.0.0
 safetensors>=0.3.0
 
 [all]
-samcell[dev,gui,napari]
+samcell[dev,excel,gui,napari,training]
 
 [dev]
 pytest>=6.0
@@ -21,9 +20,17 @@ flake8>=3.8
 mypy>=0.800
 jupyter>=1.0.0
 
+[excel]
+openpyxl>=3.0.0
+
 [gui]
 PyQt6>=6.0
 
 [napari]
 napari>=0.4.14
 magicgui>=0.5.0
+
+[training]
+h5py>=3.0.0
+torchvision>=0.10.0
+wandb>=0.12.0

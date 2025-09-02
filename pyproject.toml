@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "samcell"
-version = "1.1.0"
+version = "1.1.1"
 description = "Generalized label-free biological cell segmentation with Segment Anything"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -46,7 +46,6 @@ classifiers = [
 ]
 dependencies = [
     "torch>=1.9.0",
-    "torchvision>=0.10.0",
     "transformers>=4.26.0",
     "numpy>=1.21.0,<2.0",
     "opencv-python-headless>=4.5.0",
@@ -59,6 +58,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+training = [
+    "h5py>=3.0.0",
+    "torchvision>=0.10.0",
+    "wandb>=0.12.0",
+]
+excel = [
+    "openpyxl>=3.0.0",
+]
 dev = [
     "pytest>=6.0",
     "pytest-cov>=2.0",
@@ -75,7 +82,7 @@ napari = [
     "magicgui>=0.5.0",
 ]
 all = [
-    "samcell[dev,gui,napari]",
+    "samcell[training,excel,dev,gui,napari]",
 ]
 
 [project.urls]
