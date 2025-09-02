@@ -1,11 +1,20 @@
-import wandb
-
 def init_wandb():
-    run = wandb.init(project="cellseg")
-    return run
+    """Initialize wandb logging (requires wandb to be installed separately)."""
+    try:
+        import wandb
+        run = wandb.init(project="cellseg")
+        return run
+    except ImportError:
+        print("Warning: wandb not installed. Logging disabled.")
+        return None
     
 def log_wandb(run, current_step, learning_rate, loss):
-    run.log({"lr": learning_rate, "loss": loss}, step=current_step)
+    """Log metrics to wandb (requires wandb to be installed separately)."""
+    if run is not None:
+        try:
+            run.log({"lr": learning_rate, "loss": loss}, step=current_step)
+        except:
+            pass  # Fail silently if wandb is not available
 
 def lr_warmup(current_step):
     warmup_steps = 250

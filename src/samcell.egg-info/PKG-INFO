@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: samcell
-Version: 1.1.0
+Version: 1.1.1
 Summary: Generalized label-free biological cell segmentation with Segment Anything
 Home-page: https://github.com/saahilsanganeriya/SAMCell
 Author: Nathan J. Malta, Emilio Aponte, Caitlin van Zyl, Danfei Xu, Craig Forest
@@ -50,7 +50,6 @@ Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: torch>=1.9.0
-Requires-Dist: torchvision>=0.10.0
 Requires-Dist: transformers>=4.26.0
 Requires-Dist: numpy<2.0,>=1.21.0
 Requires-Dist: opencv-python-headless>=4.5.0
@@ -60,6 +59,12 @@ Requires-Dist: pandas>=1.3.0
 Requires-Dist: tqdm>=4.60.0
 Requires-Dist: Pillow>=8.0.0
 Requires-Dist: safetensors>=0.3.0
+Provides-Extra: training
+Requires-Dist: h5py>=3.0.0; extra == "training"
+Requires-Dist: torchvision>=0.10.0; extra == "training"
+Requires-Dist: wandb>=0.12.0; extra == "training"
+Provides-Extra: excel
+Requires-Dist: openpyxl>=3.0.0; extra == "excel"
 Provides-Extra: dev
 Requires-Dist: pytest>=6.0; extra == "dev"
 Requires-Dist: pytest-cov>=2.0; extra == "dev"
@@ -73,7 +78,7 @@ Provides-Extra: napari
 Requires-Dist: napari>=0.4.14; extra == "napari"
 Requires-Dist: magicgui>=0.5.0; extra == "napari"
 Provides-Extra: all
-Requires-Dist: samcell[dev,gui,napari]; extra == "all"
+Requires-Dist: samcell[dev,excel,gui,napari,training]; extra == "all"
 Dynamic: home-page
 Dynamic: license-file
 Dynamic: requires-python
