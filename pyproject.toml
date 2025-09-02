@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "samcell"
-version = "1.1.2"
+version = "1.1.3"
 description = "Generalized label-free biological cell segmentation with Segment Anything"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -55,6 +55,7 @@ dependencies = [
     "tqdm>=4.60.0",
     "Pillow>=8.0.0",
     "safetensors>=0.3.0",
+    "openpyxl>=3.0.0",
 ]
 
 [project.optional-dependencies]
