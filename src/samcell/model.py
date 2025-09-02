@@ -9,7 +9,6 @@ import numpy as np
 
 from transformers import SamModel, SamConfig, SamMaskDecoderConfig
 from transformers.models.sam.modeling_sam import SamMaskDecoder, SamVisionConfig
-from transformers.models.sam import convert_sam_original_to_hf_format
 from safetensors.torch import load_file
 import itertools
 import numpy as np
