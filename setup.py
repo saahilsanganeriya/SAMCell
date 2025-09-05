@@ -15,7 +15,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="samcell",
-    version="1.1.3",
+    version="1.1.4",
     author="SAMCell Team",
     author_email="saahilsanganeriya@gatech.edu",
     description="Generalized label-free biological cell segmentation with Segment Anything",

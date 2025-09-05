@@ -29,7 +29,7 @@ Example usage:
     >>> metrics = pipeline.calculate_metrics(labels, image)
 """
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 __author__ = "SAMCell Team"
 __email__ = "saahilsanganeriya@gatech.edu"
 
