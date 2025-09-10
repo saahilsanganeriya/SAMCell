@@ -2,7 +2,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Paper](https://img.shields.io/badge/Paper-bioRxiv-red.svg)](https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1)
+[![Paper](https://img.shields.io/badge/Paper-PLOS_ONE-red.svg)]([https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1](https://doi.org/10.1371/journal.pone.0319532))
 
 SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell provides superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
 
