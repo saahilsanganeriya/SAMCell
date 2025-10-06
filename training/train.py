@@ -136,6 +136,8 @@ def parse_args():
                       help='Do not fine-tune vision encoder')
     parser.add_argument('--save-interval', type=int, default=5,
                       help='Save checkpoint every N epochs')
+    parser.add_argument('--pretrained-weights', type=str, default=None,
+                      help='Path to pretrained SAMCell weights (.pt file) to start training from')
     return parser.parse_args()
 
 
@@ -258,6 +260,7 @@ def main():
             "patience": args.patience,
             "min_delta": args.min_delta,
             "finetune_vision": not args.no_finetune_vision,
+            "pretrained_weights": args.pretrained_weights,
         })
 
     # Setup dataset and dataloader
@@ -269,6 +272,17 @@ def main():
     finetune_vision = not args.no_finetune_vision
     modelHelper = FinetunedSAM(args.sam_model, finetune_vision=finetune_vision, finetune_prompt=False, finetune_decoder=True)
     model = modelHelper.get_model()
+
+    # Load pretrained weights if provided
+    if args.pretrained_weights:
+        print(f'Loading pretrained weights from {args.pretrained_weights}...')
+        try:
+            state_dict = torch.load(args.pretrained_weights, map_location='cpu')
+            model.load_state_dict(state_dict, strict=True)
+            print('✓ Successfully loaded pretrained weights')
+        except Exception as e:
+            print(f'Warning: Could not load pretrained weights: {e}')
+            print('Starting from base SAM model instead...')
 
     # Setup training
     print('Setting up training...')
