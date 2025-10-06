@@ -1,4 +1,4 @@
-# Minimal core dependencies for SAMCell
+# Core dependencies for SAMCell
 torch>=1.9.0
 transformers>=4.26.0
 numpy>=1.21.0
@@ -10,3 +10,15 @@ tqdm>=4.60.0
 Pillow>=8.0.0
 safetensors>=0.3.0
 openpyxl>=3.0.0
+
+# Optional: For training (install with: pip install -e .[training])
+# h5py>=3.0.0
+# torchvision>=0.10.0
+# wandb>=0.12.0
+# psutil>=5.8.0
+# matplotlib>=3.3.0
+
+# Optional: For evaluation/ablations (install with: pip install -e .[evaluation])
+# stardist>=0.8.0
+# matplotlib>=3.3.0
+# seaborn>=0.11.0

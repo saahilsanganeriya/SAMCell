@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: samcell
-Version: 1.1.3
+Version: 1.1.4
 Summary: Generalized label-free biological cell segmentation with Segment Anything
 Home-page: https://github.com/saahilsanganeriya/SAMCell
 Author: Nathan J. Malta, Emilio Aponte, Caitlin van Zyl, Danfei Xu, Craig Forest
