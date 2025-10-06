@@ -8,6 +8,7 @@ This directory contains training scripts for SAMCell models.
 
 Full-featured training script with:
 - Multi-dataset support (concatenates multiple datasets)
+- **Fine-tuning from pretrained weights** (NEW!)
 - Early stopping
 - Mixed precision training (AMP)
 - Comprehensive WandB logging (gradients, predictions, system metrics)
@@ -38,12 +39,19 @@ python train.py --datasets /path/to/dataset1 --no-wandb
 # Use SAM Large
 python train.py --datasets /path/to/dataset1 \
                 --sam-model facebook/sam-vit-large
+
+# Fine-tune from pretrained weights
+python train.py --datasets /path/to/dataset1 \
+                --pretrained-weights /path/to/checkpoint.pt \
+                --learning-rate 5e-5 \
+                --num-epochs 20
 ```
 
 **Arguments:**
 
 - `--datasets`: List of dataset paths (required). Each should contain `imgs.npy`, `dist_maps.npy`, and optionally `wms.npy`
 - `--sam-model`: SAM variant (`facebook/sam-vit-base`, `facebook/sam-vit-large`, `facebook/sam-vit-huge`)
+- `--pretrained-weights`: Path to pretrained SAMCell checkpoint (.pt file) to start training from (optional)
 - `--batch-size`: Batch size (default: 4)
 - `--num-epochs`: Number of epochs (default: 40)
 - `--learning-rate`: Learning rate (default: 1e-4)
@@ -55,6 +63,37 @@ python train.py --datasets /path/to/dataset1 \
 - `--finetune-vision`: Fine-tune vision encoder (default: True)
 - `--no-finetune-vision`: Freeze vision encoder
 - `--no-wandb`: Disable WandB logging
+
+### Fine-tuning from Pretrained Weights
+
+You can start training from a pretrained SAMCell checkpoint instead of from scratch:
+
+```bash
+# Fine-tune from samcell-generalist.pt
+python train.py --datasets /path/to/dataset1 \
+                --pretrained-weights ../samcell-generalist.pt \
+                --learning-rate 5e-5 \
+                --num-epochs 20 \
+                --patience 7
+
+# Fine-tune from your own checkpoint
+python train.py --datasets /path/to/dataset1 \
+                --pretrained-weights ../checkpoints/my-model/best_model.pt \
+                --learning-rate 5e-5 \
+                --num-epochs 20
+```
+
+**Benefits of fine-tuning:**
+- Faster convergence (typically 2x faster)
+- Better final performance
+- Requires fewer epochs (20-25 vs 40-50)
+- More stable training with lower learning rate
+
+**Recommended settings for fine-tuning:**
+- Learning rate: `5e-5` (half of from-scratch)
+- Epochs: `20-25` (half of from-scratch)
+- Batch size: Can often use larger (4-8)
+- Patience: `5-7` (converges faster)
 
 ### `train_simple.py` - Simple Training Script
 
