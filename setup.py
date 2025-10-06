@@ -43,8 +43,15 @@ setup(
     extras_require={
         "training": [
             "h5py>=3.0.0",
-            "torchvision>=0.10.0", 
+            "torchvision>=0.10.0",
             "wandb>=0.12.0",
+            "psutil>=5.8.0",
+            "matplotlib>=3.3.0",
+        ],
+        "evaluation": [
+            "stardist>=0.8.0",
+            "matplotlib>=3.3.0",
+            "seaborn>=0.11.0",
         ],
         "excel": [
             "openpyxl>=3.0.0",
@@ -65,7 +72,7 @@ setup(
             "magicgui>=0.5.0",
         ],
         "all": [
-            "samcell[training,excel,dev,gui,napari]",
+            "samcell[training,evaluation,excel,dev,gui,napari]",
         ],
     },
     entry_points={

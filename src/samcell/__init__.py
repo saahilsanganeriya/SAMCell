@@ -46,18 +46,27 @@ from .metrics import (
     export_metrics_excel,
     compute_gui_metrics,
 )
-from .utils import lr_warmup, init_wandb, log_wandb
+from .utils import (
+    lr_warmup,
+    init_wandb,
+    log_wandb,
+    log_gradient_stats,
+    log_predictions,
+    log_system_metrics,
+    log_training_metrics,
+    log_epoch_stats,
+)
 
 # Convenience alias
 SAMCellPipeline = SlidingWindowPipeline
 
 __all__ = [
     "FinetunedSAM",
-    "SlidingWindowPipeline", 
+    "SlidingWindowPipeline",
     "SAMCellPipeline",
     "calculate_all_metrics",
     "calculate_basic_metrics",
-    "calculate_neighbor_metrics", 
+    "calculate_neighbor_metrics",
     "calculate_summary_metrics",
     "calculate_metric_statistics",
     "export_metrics_csv",
@@ -66,4 +75,9 @@ __all__ = [
     "lr_warmup",
     "init_wandb",
     "log_wandb",
+    "log_gradient_stats",
+    "log_predictions",
+    "log_system_metrics",
+    "log_training_metrics",
+    "log_epoch_stats",
 ]

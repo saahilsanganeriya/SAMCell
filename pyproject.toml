@@ -63,6 +63,13 @@ training = [
     "h5py>=3.0.0",
     "torchvision>=0.10.0",
     "wandb>=0.12.0",
+    "psutil>=5.8.0",
+    "matplotlib>=3.3.0",
+]
+evaluation = [
+    "stardist>=0.8.0",
+    "matplotlib>=3.3.0",
+    "seaborn>=0.11.0",
 ]
 excel = [
     "openpyxl>=3.0.0",
@@ -83,7 +90,7 @@ napari = [
     "magicgui>=0.5.0",
 ]
 all = [
-    "samcell[training,excel,dev,gui,napari]",
+    "samcell[training,evaluation,excel,dev,gui,napari]",
 ]
 
 [project.urls]
@@ -91,7 +98,7 @@ Homepage = "https://github.com/saahilsanganeriya/SAMCell"
 Documentation = "https://github.com/saahilsanganeriya/SAMCell/blob/main/README.md"
 Repository = "https://github.com/saahilsanganeriya/SAMCell"
 "Bug Tracker" = "https://github.com/saahilsanganeriya/SAMCell/issues"
-Paper = "https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1"
+Paper = "https://doi.org/10.1371/journal.pone.0319532"
 
 [project.scripts]
 samcell = "samcell.cli:main"

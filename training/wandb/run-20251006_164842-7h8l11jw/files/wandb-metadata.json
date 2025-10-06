@@ -1,0 +1,63 @@
+{
+    "os": "macOS-26.0.1-arm64-arm-64bit",
+    "python": "3.11.6",
+    "heartbeatAt": "2025-10-06T20:48:43.006371",
+    "startedAt": "2025-10-06T20:48:42.437425",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--datasets",
+        "../datasets/RatcliffLab-model",
+        "../datasets/RatcliffLab-analyze",
+        "--batch-size",
+        "4",
+        "--num-epochs",
+        "50",
+        "--learning-rate",
+        "1e-4",
+        "--patience",
+        "10",
+        "--sam-model",
+        "facebook/sam-vit-base"
+    ],
+    "state": "running",
+    "program": "/Users/saahilsanganeriya/Documents/Saahil/SAMCell/SAMCell_dev/SAMCell/training/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "training/train.py",
+    "git": {
+        "remote": "https://github.com/saahilsanganeriya/SAMCell.git",
+        "commit": "ca411146cb9f219f2388c3bb289d0456f06c3ab2"
+    },
+    "email": "ssanganeria3@gatech.edu",
+    "root": "/Users/saahilsanganeriya/Documents/Saahil/SAMCell/SAMCell_dev/SAMCell",
+    "host": "Saahils-MacBook-Pro.local",
+    "username": "saahilsanganeriya",
+    "executable": "/Users/saahilsanganeriya/anaconda3/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 4056,
+        "min": 1020,
+        "max": 4056
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4056,
+            "min": 1020,
+            "max": 4056
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 460.4317207336426,
+            "used": 11.210948944091797
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 48.0
+    }
+}
