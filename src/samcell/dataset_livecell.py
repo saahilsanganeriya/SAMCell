@@ -35,27 +35,35 @@ class SAMDataset(Dataset):
         return len(self.imgs)
     
     def _preprocess(self, img):
+        """Preprocess image with improved normalization and CLAHE.
 
-        #convert to grayscale if necessary
+        Parameters
+        ----------
+        img : np.ndarray
+            Input image (grayscale or BGR)
+
+        Returns
+        -------
+        np.ndarray
+            Preprocessed 3-channel BGR image
+        """
+        # Convert to grayscale if necessary
         if len(img.shape) == 3:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            img_gray = img.copy()
 
-        #adaptive hist normalization
-        # img_norm = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8)).apply(img)
+        # Normalize to 0-255 range
+        img_norm = cv2.normalize(img_gray, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-        #grab 2nd derivative via laplacian
-        # edges = cv2.Laplacian(img_norm, cv2.CV_64F, ksize=3)
-        # edges = img_norm
+        # Apply CLAHE for local contrast enhancement
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        img_clahe = clahe.apply(img_norm)
 
-        #grab 1st derivative via sobel
-        # edges = cv2.Sobel(img_norm, cv2.CV_64F, 1, 1, ksize=3)
-        
-        img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        # Convert grayscale to 3-channel BGR for SAM
+        img_bgr = cv2.cvtColor(img_clahe, cv2.COLOR_GRAY2BGR)
 
-        #cvt to 3 channel
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        
-        return img
+        return img_bgr
     
     def _data_augmentation(self, img, label, weight):
         #random flip

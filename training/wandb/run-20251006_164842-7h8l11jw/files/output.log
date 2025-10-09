@@ -1,0 +1,69 @@
+Loading dataset from ../datasets/RatcliffLab-model...
+Loaded 9 images from ../datasets/RatcliffLab-model
+Loading dataset from ../datasets/RatcliffLab-analyze...
+Loaded 12 images from ../datasets/RatcliffLab-analyze
+Concatenating datasets...
+Total images after concatenation: 21
+Loading model facebook/sam-vit-base...
+Setting up training...
+Model will be saved to ../checkpoints/samcell-RatcliffLab-model+RatcliffLab-analyze-sam-vit-base
+Fetching 1 files: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 12483.05it/s]
+Fetching 1 files: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 19599.55it/s]
+Epoch 1/50:   0%|                                                                                                                                                                                    | 0/6 [00:56<?, ?it/s]
+Traceback (most recent call last):
+  File "/Users/saahilsanganeriya/Documents/Saahil/SAMCell/SAMCell_dev/SAMCell/training/train.py", line 411, in <module>
+    main()
+  File "/Users/saahilsanganeriya/Documents/Saahil/SAMCell/SAMCell_dev/SAMCell/training/train.py", line 308, in main
+    outputs = model(pixel_values=batch["pixel_values"].to(device),
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/utils/generic.py", line 1064, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/models/sam/modeling_sam.py", line 1350, in forward
+    low_res_masks, iou_predictions = self.mask_decoder(
+                                     ^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/models/sam/modeling_sam.py", line 508, in forward
+    point_embedding, image_embeddings = self.transformer(
+                                        ^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/models/sam/modeling_sam.py", line 393, in forward
+    queries, keys, _ = layer(
+                       ^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/models/sam/modeling_sam.py", line 321, in forward
+    queries, _ = self.self_attn(query=queries, key=queries, value=queries)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/transformers/models/sam/modeling_sam.py", line 265, in forward
+    dropout=0.0 if not self.training else self.dropout_p,
+                                          ^^^^^^^^^^^^^^
+  File "/Users/saahilsanganeriya/anaconda3/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1962, in __getattr__
+    raise AttributeError(
+AttributeError: 'SamAttention' object has no attribute 'dropout_p'
