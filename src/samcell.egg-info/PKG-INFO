@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: samcell
-Version: 1.1.4
+Version: 1.2.0
 Summary: Generalized label-free biological cell segmentation with Segment Anything
 Home-page: https://github.com/saahilsanganeriya/SAMCell
 Author: Nathan J. Malta, Emilio Aponte, Caitlin van Zyl, Danfei Xu, Craig Forest
@@ -32,7 +32,7 @@ Project-URL: Homepage, https://github.com/saahilsanganeriya/SAMCell
 Project-URL: Documentation, https://github.com/saahilsanganeriya/SAMCell/blob/main/README.md
 Project-URL: Repository, https://github.com/saahilsanganeriya/SAMCell
 Project-URL: Bug Tracker, https://github.com/saahilsanganeriya/SAMCell/issues
-Project-URL: Paper, https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1
+Project-URL: Paper, https://doi.org/10.1371/journal.pone.0319532
 Keywords: cell segmentation,microscopy,computer vision,deep learning,segment anything,biology,image analysis
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Science/Research
@@ -64,6 +64,12 @@ Provides-Extra: training
 Requires-Dist: h5py>=3.0.0; extra == "training"
 Requires-Dist: torchvision>=0.10.0; extra == "training"
 Requires-Dist: wandb>=0.12.0; extra == "training"
+Requires-Dist: psutil>=5.8.0; extra == "training"
+Requires-Dist: matplotlib>=3.3.0; extra == "training"
+Provides-Extra: evaluation
+Requires-Dist: stardist>=0.8.0; extra == "evaluation"
+Requires-Dist: matplotlib>=3.3.0; extra == "evaluation"
+Requires-Dist: seaborn>=0.11.0; extra == "evaluation"
 Provides-Extra: excel
 Requires-Dist: openpyxl>=3.0.0; extra == "excel"
 Provides-Extra: dev
@@ -79,7 +85,7 @@ Provides-Extra: napari
 Requires-Dist: napari>=0.4.14; extra == "napari"
 Requires-Dist: magicgui>=0.5.0; extra == "napari"
 Provides-Extra: all
-Requires-Dist: samcell[dev,excel,gui,napari,training]; extra == "all"
+Requires-Dist: samcell[dev,evaluation,excel,gui,napari,training]; extra == "all"
 Dynamic: home-page
 Dynamic: license-file
 Dynamic: requires-python
@@ -88,15 +94,16 @@ Dynamic: requires-python
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Paper](https://img.shields.io/badge/Paper-bioRxiv-red.svg)](https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1)
+[![Paper](https://img.shields.io/badge/Paper-PLOS%20ONE-red.svg)](https://doi.org/10.1371/journal.pone.0319532)
 
-SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell provides superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
+SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell uses a novel distance map regression approach with watershed post-processing to achieve superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
 
 ## 🌟 Key Features
 
-- **State-of-the-art Performance**: Outperforms existing methods like Cellpose, Stardist, and CALT-US
-- **Zero-shot Generalization**: Works on new cell types and microscopes without retraining
-- **Distance Map Regression**: Novel approach using Euclidean distance maps for robust segmentation
+- **State-of-the-art Performance**: Outperforms existing methods like Cellpose, Stardist, and CALT-US on both test-set and zero-shot cross-dataset evaluation
+- **Zero-shot Generalization**: Works on novel cell types and microscopes not seen during training
+- **Distance Map Regression**: Predicts Euclidean distance to cell boundaries instead of binary masks, enabling better separation of densely packed cells
+- **Vision Transformer Architecture**: Leverages SAM's ViT-based encoder pretrained on 11M images for robust feature extraction
 - **Comprehensive Metrics**: Calculate 30+ morphological and intensity-based cell metrics
 - **Easy Integration**: Simple Python API with minimal setup
 - **Multiple Interfaces**: Command-line tool, Python API, GUI, and Napari plugin
@@ -105,13 +112,29 @@ SAMCell is a state-of-the-art deep learning model for automated cell segmentatio
 
 SAMCell demonstrates superior performance in both test-set and zero-shot cross-dataset evaluation:
 
-| Method | PBL-HEK (OP_CSB) | PBL-N2a (OP_CSB) |
-|--------|------------------|------------------|
-| **SAMCell-Generalist** | **0.598** | **0.824** |
-| Cellpose | 0.320 | 0.764 |
-| Stardist | 0.189 | 0.724 |
+### Test-Set Performance
 
-*Results on zero-shot cross-dataset evaluation*
+| Dataset | Method | SEG | DET | OP_CSB |
+|---------|--------|-----|-----|--------|
+| LIVECell | **SAMCell** | **0.652** | **0.893** | **0.772** |
+| | Cellpose | 0.589 | 0.779 | 0.684 |
+| | Stardist | 0.572 | 0.771 | 0.671 |
+| Cytoplasm | **SAMCell** | **0.611** | **0.866** | **0.739** |
+| | Cellpose | 0.580 | 0.749 | 0.664 |
+| | Stardist | 0.557 | 0.774 | 0.666 |
+
+### Zero-Shot Cross-Dataset Performance
+
+| Dataset | Method | SEG | DET | OP_CSB |
+|---------|--------|-----|-----|--------|
+| PBL-HEK | **SAMCell-Generalist** | **0.425** | **0.772** | **0.598** |
+| | Cellpose-Cyto | 0.253 | 0.388 | 0.320 |
+| | Stardist-Cyto | 0.142 | 0.236 | 0.189 |
+| PBL-N2a | **SAMCell-Generalist** | **0.707** | **0.941** | **0.824** |
+| | Cellpose-Cyto | 0.642 | 0.885 | 0.764 |
+| | Stardist-Cyto | 0.597 | 0.851 | 0.724 |
+
+*SAMCell-Generalist trained on LIVECell + Cytoplasm datasets. PBL-HEK and PBL-N2a contain novel cell types not seen during training.*
 
 ## 🚀 Quick Start
 
@@ -336,22 +359,55 @@ SAMCell calculates comprehensive morphological metrics:
 
 ## 🔬 Method Overview
 
-SAMCell introduces several key innovations:
+SAMCell introduces several key innovations for robust cell segmentation:
 
-1. **Distance Map Regression**: Instead of direct segmentation, predicts Euclidean distance from each pixel to cell boundaries
-2. **Watershed Post-processing**: Converts distance maps to discrete cell masks using watershed algorithm
-3. **Sliding Window Inference**: Processes large images in overlapping 256×256 patches
-4. **No Prompting Required**: Works automatically without user-provided prompts
+### 1. Distance Map Regression
+Instead of predicting binary masks or multi-class segmentation, SAMCell predicts a continuous-valued distance map where each pixel value represents the normalized Euclidean distance from that pixel to its cell's boundary (0 to 1 range). This approach effectively addresses the challenge of segmenting densely packed cells with ambiguous boundaries.
+
+### 2. Vision Transformer Architecture
+SAMCell inherits SAM's ViT-based image encoder pretrained on 11 million diverse natural images. This extensive pretraining provides:
+- Strong priors for boundary detection across imaging conditions
+- Long-range dependency modeling via self-attention mechanisms
+- Superior generalization to novel cell types and microscopes
+
+### 3. Watershed Post-Processing
+Converts predicted distance maps to discrete cell masks using the watershed algorithm:
+- **Cell Peak Threshold (default: 0.47)**: Identifies cell centers from distance map peaks
+- **Cell Fill Threshold (default: 0.09)**: Determines cell boundaries
+- The watershed algorithm treats the distance map as a topographical surface, flooding from cell centers to naturally separate touching cells
+
+### 4. Sliding Window Inference
+Processes large microscopy images efficiently:
+- Divides images into overlapping 256×256 patches (32-pixel overlap)
+- Each patch upsampled to 1024×1024 for SAM's encoder
+- Predictions stitched with cosine blending to avoid edge artifacts
+
+### 5. No Prompting Required
+Unlike vanilla SAM, SAMCell eliminates manual prompting by:
+- Freezing the prompt encoder during fine-tuning
+- Using SAM's default prompt embedding as a static input
+- The mask decoder learns to predict distance maps from image embeddings alone
+
+### Training Details
+- **Model**: SAM-Base (ViT-B) with 89M parameters
+- **Fine-tuning**: Full fine-tuning of image encoder and mask decoder
+- **Loss**: Mean Squared Error (MSE) on sigmoid-activated predictions
+- **Optimizer**: AdamW (lr=1e-4, weight decay=0.1)
+- **Training**: Early stopping with patience=7, trained for 35 epochs on NVIDIA A100
+- **Data Augmentation**: Random flip, rotation (-180° to 180°), scale (0.8-1.2×), brightness (0.95-1.05×), inversion
+- **Preprocessing**: CLAHE (clipLimit=3.0, tileGridSize=8×8) for contrast enhancement
 
 ## 📊 Datasets
 
-SAMCell was trained on:
-- **LIVECell**: 5,000+ phase-contrast images, 8 cell types, 1.7M annotated cells
-- **Cellpose Cytoplasm**: ~600 diverse microscopy images from internet sources
+### Training Datasets
+- **LIVECell**: 5,000+ phase-contrast images across 8 cell types containing ~1.7M individually annotated cells. All images captured with same microscope at standardized size (704×520 pixels). Provides large-scale training data with diverse cell morphologies and confluencies.
+- **Cellpose Cytoplasm**: ~600 microscopy images from diverse internet sources. Includes both bright-field and fluorescent microscopy from different microscopes. Smaller but more diverse in imaging conditions. Images resized to 512×512 pixels preserving aspect ratio.
 
-Evaluated on novel datasets:
-- **PBL-HEK**: Human Embryonic Kidney 293 cells
-- **PBL-N2a**: Neuro-2a cells
+### Evaluation Datasets (Zero-Shot)
+- **PBL-HEK**: 5 phase-contrast images of Human Embryonic Kidney 293 cells (~300 cells per image). Captured with different microscope than training data. Features densely packed cells with irregular morphologies.
+- **PBL-N2a**: 5 phase-contrast images of Neuro-2a cells (~300 cells per image). Novel cell line and microscope not seen in training. More circular morphology with distinct boundaries compared to HEK cells.
+
+Both evaluation datasets available at: https://github.com/saahilsanganeriya/SAMCell/releases/tag/v1
 
 ## 🤝 Contributing
 
@@ -361,15 +417,20 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 If you use SAMCell in your research, please cite our paper:
 
+VandeLoo AD*, Malta NJ*, Sanganeriya S, Aponte E, van Zyl C, et al. (2025) SAMCell: Generalized label-free biological cell segmentation with segment anything. PLOS ONE 20(9): e0319532. https://doi.org/10.1371/journal.pone.0319532
+
 ```bibtex
 @article{vandeloo2025samcell,
     title={SAMCell: Generalized label-free biological cell segmentation with segment anything},
     author={VandeLoo, Alexandra Dunnum and Malta, Nathan J and Sanganeriya, Saahil and Aponte, Emilio and van Zyl, Caitlin and Xu, Danfei and Forest, Craig},
-    journal={bioRxiv},
+    journal={PLOS ONE},
+    volume={20},
+    number={9},
+    pages={e0319532},
     year={2025},
-    publisher={Cold Spring Harbor Laboratory},
-    doi={10.1101/2025.02.06.636835},
-    url={https://www.biorxiv.org/content/10.1101/2025.02.06.636835v1}
+    publisher={Public Library of Science},
+    doi={10.1371/journal.pone.0319532},
+    url={https://doi.org/10.1371/journal.pone.0319532}
 }
 ```
 
