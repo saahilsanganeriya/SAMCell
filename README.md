@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Paper](https://img.shields.io/badge/Paper-PLOS%20ONE-red.svg)](https://doi.org/10.1371/journal.pone.0319532)
 
-![yeast segmented](https://github.com/user-attachments/assets/6f86f187-1fd3-4272-a248-8861bd3f33f3)
-
 SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell uses a novel distance map regression approach with watershed post-processing to achieve superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
+
+![yeast segmented](https://github.com/user-attachments/assets/6f86f187-1fd3-4272-a248-8861bd3f33f3)
 
 ## 🌟 Key Features
 
