@@ -4,23 +4,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Paper](https://img.shields.io/badge/Paper-PLOS%20ONE-red.svg)](https://doi.org/10.1371/journal.pone.0319532)
 
-SAMCell is a state-of-the-art deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell uses a novel distance map regression approach with watershed post-processing to achieve superior performance for label-free cell segmentation across diverse cell types and imaging conditions.
+SAMCell is a deep learning model for automated cell segmentation in microscopy images. Built on Meta's Segment Anything Model (SAM), SAMCell regresses a distance map and uses watershed post-processing to segment label-free cells across diverse cell types and imaging conditions, with no prompts. On LIVECell it scores 0.77 OP_CSB against Cellpose's 0.68; on PBL-HEK, a cell line and microscope it never saw in training, SAMCell-Generalist scores 0.60 against Cellpose's 0.32 (see [Performance](#performance)).
 
 ![yeast segmented](https://github.com/user-attachments/assets/6f86f187-1fd3-4272-a248-8861bd3f33f3)
 
-## 🌟 Key Features
+## Key Features
 
-- **State-of-the-art Performance**: Outperforms existing methods like Cellpose, Stardist, and CALT-US on both test-set and zero-shot cross-dataset evaluation
+- **Higher Scores than the Baselines**: Beats Cellpose, Stardist, and CALT-US on SEG, DET, and OP_CSB for every dataset in the paper's comparison tables, including zero-shot cross-dataset evaluation (SAMCell-Generalist)
 - **Zero-shot Generalization**: Works on novel cell types and microscopes not seen during training
 - **Distance Map Regression**: Predicts Euclidean distance to cell boundaries instead of binary masks, enabling better separation of densely packed cells
 - **Vision Transformer Architecture**: Leverages SAM's ViT-based encoder pretrained on 11M images for robust feature extraction
 - **Comprehensive Metrics**: Calculate 30+ morphological and intensity-based cell metrics
 - **Easy Integration**: Simple Python API with minimal setup
-- **Multiple Interfaces**: Command-line tool, Python API, GUI, and Napari plugin
+- **Multiple Interfaces**: Command-line tool, Python API, and a Napari plugin ([samcell-napari](https://github.com/saahilsanganeriya/samcell-napari))
 
-## 📊 Performance
+## Performance
 
-SAMCell demonstrates superior performance in both test-set and zero-shot cross-dataset evaluation:
+Scores from Tables 1 and 2 of the [paper](https://doi.org/10.1371/journal.pone.0319532), rounded to three places. SEG and DET are the Cell Tracking Challenge measures and OP_CSB is their mean; `evaluation/eval_utils.py` computes all three. The paper also compares CALT-US, which scores below SAMCell on every metric.
 
 ### Test-Set Performance
 
@@ -46,7 +46,7 @@ SAMCell demonstrates superior performance in both test-set and zero-shot cross-d
 
 *SAMCell-Generalist trained on LIVECell + Cytoplasm datasets. PBL-HEK and PBL-N2a contain novel cell types not seen during training.*
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -112,7 +112,7 @@ samcell segment image.png --model samcell-generalist.pt --output results/ --expo
 samcell segment image.png --model samcell-generalist.pt --peak-threshold 0.5 --fill-threshold 0.1
 ```
 
-## 📋 Requirements
+## Requirements
 
 - Python ≥ 3.8
 - PyTorch ≥ 1.9.0
@@ -125,7 +125,7 @@ For GPU acceleration:
 - CUDA-compatible GPU
 - CUDA Toolkit ≥ 11.0
 
-## 🔧 Advanced Usage
+## Advanced Usage
 
 ### Custom Thresholds
 
@@ -171,29 +171,19 @@ full_metrics = samcell.calculate_all_metrics(
 )
 ```
 
-## 🖥️ GUI and Napari Plugin
+## Napari Plugin
 
-### Standalone GUI
-
-```bash
-# Install GUI dependencies
-pip install samcell[gui]
-
-# Launch GUI
-python -m samcell.gui
-```
-
-### Napari Plugin
+The point-and-click Napari plugin is a separate package, [samcell-napari](https://github.com/saahilsanganeriya/samcell-napari):
 
 ```bash
-# Install napari plugin
-pip install samcell[napari]
+# Install the napari plugin
+pip install samcell-napari
 
-# Launch napari and find SAMCell in the plugins menu
+# Launch napari, then open Plugins > samcell-napari > SAMCell Segmentation
 napari
 ```
 
-## 📖 Documentation
+## Documentation
 
 ### API Reference
 
@@ -267,9 +257,9 @@ SAMCell calculates comprehensive morphological metrics:
 - Contrast, Homogeneity, Energy
 - Correlation, Dissimilarity
 
-## 🔬 Method Overview
+## Method Overview
 
-SAMCell introduces several key innovations for robust cell segmentation:
+SAMCell's method has five parts:
 
 ### 1. Distance Map Regression
 Instead of predicting binary masks or multi-class segmentation, SAMCell predicts a continuous-valued distance map where each pixel value represents the normalized Euclidean distance from that pixel to its cell's boundary (0 to 1 range). This approach effectively addresses the challenge of segmenting densely packed cells with ambiguous boundaries.
@@ -278,7 +268,7 @@ Instead of predicting binary masks or multi-class segmentation, SAMCell predicts
 SAMCell inherits SAM's ViT-based image encoder pretrained on 11 million diverse natural images. This extensive pretraining provides:
 - Strong priors for boundary detection across imaging conditions
 - Long-range dependency modeling via self-attention mechanisms
-- Superior generalization to novel cell types and microscopes
+- Generalization to novel cell types and microscopes (see the zero-shot table above)
 
 ### 3. Watershed Post-Processing
 Converts predicted distance maps to discrete cell masks using the watershed algorithm:
@@ -307,7 +297,7 @@ Unlike vanilla SAM, SAMCell eliminates manual prompting by:
 - **Data Augmentation**: Random flip, rotation (-180° to 180°), scale (0.8-1.2×), brightness (0.95-1.05×), inversion
 - **Preprocessing**: CLAHE (clipLimit=3.0, tileGridSize=8×8) for contrast enhancement
 
-## 📊 Datasets
+## Datasets
 
 ### Training Datasets
 - **LIVECell**: 5,000+ phase-contrast images across 8 cell types containing ~1.7M individually annotated cells. All images captured with same microscope at standardized size (704×520 pixels). Provides large-scale training data with diverse cell morphologies and confluencies.
@@ -319,15 +309,21 @@ Unlike vanilla SAM, SAMCell eliminates manual prompting by:
 
 Both evaluation datasets available at: https://github.com/saahilsanganeriya/SAMCell/releases/tag/v1
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+Pull requests are welcome.
 
-## 📄 Citation
+## Who Built What
+
+This repository is a fork of [NathanMalta/SAMCell](https://github.com/NathanMalta/SAMCell), where Nathan Malta wrote the first version in 2023: the model wrapper, the sliding-window pipeline with overlapping crops, the LIVECell dataset loader, the first training script, and the distance-map notebook. Saahil Sanganeriya's commits (2025) add cosine blending between crops, the pip package and `samcell` command, the cell metrics, the training, evaluation, and ablation scripts, the unified dataset processing, and the releases from 1.1.0 to 1.2.0. The paper's full author list is in the citation below.
+
+## Citation
 
 If you use SAMCell in your research, please cite our paper:
 
-VandeLoo AD*, Malta NJ*, Sanganeriya S, Aponte E, van Zyl C, et al. (2025) SAMCell: Generalized label-free biological cell segmentation with segment anything. PLOS ONE 20(9): e0319532. https://doi.org/10.1371/journal.pone.0319532
+VandeLoo AD\*, Malta NJ\*, Sanganeriya S, Aponte E, van Zyl C, Xu D, Forest C (2025) SAMCell: Generalized label-free biological cell segmentation with segment anything. PLOS ONE 20(9): e0319532. https://doi.org/10.1371/journal.pone.0319532
+
+\* Co-first authors.
 
 ```bibtex
 @article{vandeloo2025samcell,
@@ -344,17 +340,15 @@ VandeLoo AD*, Malta NJ*, Sanganeriya S, Aponte E, van Zyl C, et al. (2025) SAMCe
 }
 ```
 
-## 📞 Support
+## Support
 
-- **Issues**: [GitHub Issues](https://github.com/saahilsanganeriya/SAMCell/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/saahilsanganeriya/SAMCell/discussions)
 - **Email**: saahilsanganeriya@gatech.edu
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🏛️ Institutions
+## Institutions
 
 This work was developed at:
 - **Georgia Institute of Technology**
@@ -364,13 +358,9 @@ This work was developed at:
   - School of Mechanical Engineering
   - School of Interactive Computing
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Meta AI for the original Segment Anything Model
 - The open-source community for tools and datasets
 - Georgia Tech for computational resources
 - All contributors and users of SAMCell
-
----
-
-**SAMCell Team** - Making cell segmentation accessible to everyone! 🔬✨
